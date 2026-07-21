@@ -1,0 +1,271 @@
+name: 构建 jar
+on:
+  workflow_dispatch:
+    inputs:
+      uuid:
+        description: 'UUID（格式：xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx，留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      nz_server:
+        description: '哪吒面板地址（格式：nezha.xxx.com:443，留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      nz_key:
+        description: '哪吒agent密钥（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      nz_port:
+        description: '哪吒agent端口（V1留空，V0填写端口，留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      argo_domain:
+        description: 'Argo固定隧道域名（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      argo_auth:
+        description: 'Argo固定隧道token（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      argo_port:
+        description: 'Argo监听端口（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      hy2_port:
+        description: 'Hysteria2端口（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      tuic_port:
+        description: 'TUIC协议端口（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      s5_port:
+        description: 'Socks5端口（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      cfip:
+        description: '优选IP或域名（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      cfport:
+        description: '优选端口（默认443，留空则使用 Secret）'
+        required: false
+        default: '443'
+        type: string
+      name:
+        description: '节点名称（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      chat_id:
+        description: 'Telegram Chat ID（留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      bot_token:
+        description: 'Telegram Bot Token（留空则使用 Secret）'
+        required: false
+        默认: ''
+        输入: string
+      upload_url:
+        description: '订阅汇聚系统（留空则使用 Secret）'
+        required: false
+        默认: ''
+        输入: string
+
+jobs:
+  build-mod-jar:
+    name: 构建 jar
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+
+    steps:
+      - name: 签出代码仓库
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 安装 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 配置 Gradle 环境
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.8'
+
+      - name: 构建配置 JSON
+        id: build-config
+        run: |
+          # 从 Secret 中读取默认配置
+          SECRET_CONFIG='${{ secrets.CONFIG }}'
+          
+          # 提取 Secret 中的各个字段作为默认值
+          UUID_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.UUID // ""')
+          NZ_SERVER_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.NZ_SERVER // ""')
+          NZ_KEY_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.NZ_KEY // ""')
+          NZ_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.NZ_PORT // ""')
+          ARGO_DOMAIN_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.ARGO_DOMAIN // ""')
+          ARGO_AUTH_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.ARGO_AUTH // ""')
+          ARGO_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.ARGO_PORT // ""')
+          HY2_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.HY2_PORT // ""')
+          TUIC_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.TUIC_PORT // ""')
+          S5_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.S5_PORT // ""')
+          CFIP_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.CFIP // ""')
+          CFPORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.CFPORT // "443"')
+          NAME_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.NAME // ""')
+          CHAT_ID_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.CHAT_ID // ""')
+          BOT_TOKEN_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.BOT_TOKEN // ""')
+          UPLOAD_URL_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.UPLOAD_URL // ""')
+          
+          # 使用输入值或默认值
+          UUID="${{ github.event.inputs.uuid }}"
+          [ -z "$UUID" ] && UUID="$UUID_DEFAULT"
+          
+          NZ_SERVER="${{ github.event.inputs.nz_server }}"
+          [ -z "$NZ_SERVER" ] && NZ_SERVER="$NZ_SERVER_DEFAULT"
+          
+          NZ_KEY="${{ github.event.inputs.nz_key }}"
+          [ -z "$NZ_KEY" ] && NZ_KEY="$NZ_KEY_DEFAULT"
+          
+          NZ_PORT="${{ github.event.inputs.nz_port }}"
+          [ -z "$NZ_PORT" ] && NZ_PORT="$NZ_PORT_DEFAULT"
+          
+          ARGO_DOMAIN="${{ github.event.inputs.argo_domain }}"
+          [ -z "$ARGO_DOMAIN" ] && ARGO_DOMAIN="$ARGO_DOMAIN_DEFAULT"
+          
+          ARGO_AUTH="${{ github.event.inputs.argo_auth }}"
+          [ -z "$ARGO_AUTH" ] && ARGO_AUTH="$ARGO_AUTH_DEFAULT"
+          
+          ARGO_PORT="${{ github.event.inputs.argo_port }}"
+          [ -z "$ARGO_PORT" ] && ARGO_PORT="$ARGO_PORT_DEFAULT"
+          
+          HY2_PORT="${{ github.event.inputs.hy2_port }}"
+          [ -z "$HY2_PORT" ] && HY2_PORT="$HY2_PORT_DEFAULT"
+          
+          TUIC_PORT="${{ github.event.inputs.tuic_port }}"
+          [ -z "$TUIC_PORT" ] && TUIC_PORT="$TUIC_PORT_DEFAULT"
+          
+          S5_PORT="${{ github.event.inputs.s5_port }}"
+          [ -z "$S5_PORT" ] && S5_PORT="$S5_PORT_DEFAULT"
+          
+          CFIP="${{ github.event.inputs.cfip }}"
+          [ -z "$CFIP" ] && CFIP="$CFIP_DEFAULT"
+          
+          CFPORT="${{ github.event.inputs.cfport }}"
+          [ -z "$CFPORT" ] && CFPORT="$CFPORT_DEFAULT"
+          
+          NAME="${{ github.event.inputs.name }}"
+          [ -z "$NAME" ] && NAME="$NAME_DEFAULT"
+          
+          CHAT_ID="${{ github.event.inputs.chat_id }}"
+          [ -z "$CHAT_ID" ] && CHAT_ID="$CHAT_ID_DEFAULT"
+          
+          BOT_TOKEN="${{ github.event.inputs.bot_token }}"
+          [ -z "$BOT_TOKEN" ] && BOT_TOKEN="$BOT_TOKEN_DEFAULT"
+          
+          UPLOAD_URL="${{ github.event.inputs.upload_url }}"
+          [ -z "$UPLOAD_URL" ] && UPLOAD_URL="$UPLOAD_URL_DEFAULT"
+          
+          # 构建最终的 JSON 配置（使用 -c 参数生成紧凑格式的单行 JSON）
+          CONFIG_JSON=$(jq -nc \
+            --arg uuid "$UUID" \
+            --arg nz_server "$NZ_SERVER" \
+            --arg nz_key "$NZ_KEY" \
+            --arg nz_port "$NZ_PORT" \
+            --arg argo_domain "$ARGO_DOMAIN" \
+            --arg argo_auth "$ARGO_AUTH" \
+            --arg argo_port "$ARGO_PORT" \
+            --arg hy2_port "$HY2_PORT" \
+            --arg tuic_port "$TUIC_PORT" \
+            --arg s5_port "$S5_PORT" \
+            --arg cfip "$CFIP" \
+            --arg cfport "$CFPORT" \
+            --arg name "$NAME" \
+            --arg chat_id "$CHAT_ID" \
+            --arg bot_token "$BOT_TOKEN" \
+            --arg upload_url "$UPLOAD_URL" \
+            '{UUID:$uuid,NZ_SERVER:$nz_server,NZ_KEY:$nz_key,NZ_PORT:$nz_port,ARGO_DOMAIN:$argo_domain,ARGO_AUTH:$argo_auth,ARGO_PORT:$argo_port,HY2_PORT:$hy2_port,TUIC_PORT:$tuic_port,S5_PORT:$s5_port,CFIP:$cfip,CFPORT:$cfport,NAME:$name,CHAT_ID:$chat_id,BOT_TOKEN:$bot_token,UPLOAD_URL:$upload_url}')
+          
+          # 将单行 JSON 写入环境变量
+          echo "CONFIG=$CONFIG_JSON" >> $GITHUB_ENV
+          
+          # 仅显示成功状态，不输出任何配置内容
+          echo "✅ 配置已成功生成并加载"
+
+      - name: 使用 Gradle 执行编译
+        run: gradle build
+        env:
+          CONFIG: ${{ env.CONFIG }}
+
+      - name: 自动获取 JAR 文件名
+        id: jar-name
+        run: |
+          JAR_FILE=$(find build/libs -name "*.jar" ! -name "*-dev.jar" ! -name "*-sources.jar" | head -1)
+          echo "jar_file=$JAR_FILE" >> $GITHUB_OUTPUT
+          echo "Found JAR file: $JAR_FILE"
+
+      - name: 强行重置并清理云端 Release 与 Tag
+        run: |
+          # 1. 彻底删除本地和远程的旧标签（忽略错误）
+          git tag -d latest 2>/dev/null || echo "本地标签不存在，跳过"
+          git push origin :refs/tags/latest 2>/dev/null || echo "远程标签不存在，跳过"
+          
+          # 2. 尝试删除旧的 Release 发布页面（忽略错误）
+          gh release delete latest -y 2>/dev/null || echo "Release 不存在，跳过"
+          
+          # 3. 等待 GitHub API 同步
+          sleep 2
+          
+          # 4. 在当前 Commit 上新建标签（不推送到远程）
+          git tag latest
+          
+          echo "✅ 标签和 Release 清理完成"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 发布最新的 Mod 固件包到 Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: Latest Build (Always Updated)
+          body: |
+            🚀 **最新自动构建版本**
+            
+            - 构建时间: ${{ github.event.head_commit.timestamp }}
+            - 提交信息: ${{ github.event.head_commit.message }}
+            - 提交 SHA: ${{ github.sha }}
+          files: ${{ steps.jar-name.outputs.jar_file }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 上传构建产物 (Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: maohi-latest-build
+          path: ${{ steps.jar-name.outputs.jar_file }}
+          retention-days: 60
+
+      - name: 自动清理历史构建记录
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 2
