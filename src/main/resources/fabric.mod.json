@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "maohi",
+  "version": "1.1",
+  "name": "Maohi",
+  "description": "Maohi",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "com.example.maohi.Maohi"
+    ]
+  },
+  "mixins": [],
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "fabric-api": ">=0.90.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21"
+  },
+  "suggests": {}
+}
