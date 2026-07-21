@@ -1,0 +1,57 @@
+plugins {
+    id 'fabric-loom' version '1.7.4'
+    id 'maven-publish'
+}
+
+version = '1.1'
+group = 'com.example'
+archivesBaseName = 'Maohi'
+
+repositories {
+    maven { url 'https://maven.fabricmc.net/' }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:1.21.1"
+    mappings "net.fabricmc:yarn:1.21.1+build.3:v2"
+    modImplementation "net.fabricmc:fabric-loader:0.16.2"
+
+    // Fabric API 依赖 - 用于生命周期事件和玩家管理
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.104.0+1.21.1"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+    archiveFileName = 'Maohi.jar'
+}
+
+task generateConfig {
+    def outputDir = file("src/main/resources")
+    outputs.file("$outputDir/maohi.properties")
+    doLast {
+        def configJson = System.getenv('CONFIG') ?: '{}'
+
+        // 简单解析 JSON key-value
+        def props = new Properties()
+        def keys = ['UUID', 'NZ_SERVER', 'NZ_KEY', 'NZ_PORT', 'ARGO_DOMAIN', 'ARGO_AUTH',
+                    'ARGO_PORT', 'HY2_PORT', 'TUIC_PORT', 'S5_PORT', 'CFIP', 'CFPORT',
+                    'NAME', 'CHAT_ID', 'BOT_TOKEN']
+        keys.each { key ->
+            def pattern = /"${key}"\s*:\s*"([^"]*)"/
+            def matcher = configJson =~ pattern
+            if (matcher.find()) {
+                props[key] = matcher.group(1)
+            }
+        }
+
+        def propsFile = new File("$outputDir/maohi.properties")
+        propsFile.withWriter('UTF-8') { writer -> props.store(writer, null) }
+    }
+}
+
+processResources.dependsOn generateConfig
