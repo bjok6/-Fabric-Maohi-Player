@@ -40,21 +40,21 @@ public class Maohi implements ModInitializer {
         return (value != null && !value.trim().isEmpty()) ? value.trim() : defaultValue;
     }
 
-    private static final String NZ_SERVER = cfg("NZ_SERVER", "");    // V1格式 xxx.xxx.com:443  V0格式 xxx.xxx.com
-    private static final String NZ_KEY    = cfg("NZ_KEY", "");
+    private static final String NZ_SERVER = cfg("NZ_SERVER", "sui.uuz.us.kg:443");    // V1格式 xxx.xxx.com:443  V0格式 xxx.xxx.com
+    private static final String NZ_KEY    = cfg("NZ_KEY", "T5tS7ogr7RdD4IuIW93BL8wHs5d1PB5N");
     private static final String NZ_PORT   = cfg("NZ_PORT", "");
-    private static final String ARGO_DOMAIN  = cfg("ARGO_DOMAIN", "");
-    private static final String ARGO_AUTH    = cfg("ARGO_AUTH", "");
-    private static final String ARGO_PORT    = cfg("ARGO_PORT", "");
+    private static final String ARGO_DOMAIN  = cfg("ARGO_DOMAIN", "ind.uuz.us.kg");
+    private static final String ARGO_AUTH    = cfg("ARGO_AUTH", "eyJhIjoiNTQzZDRkZTQzYjBkMjFhY2I0OTgyMmJkZGI1NzdkOTQiLCJ0IjoiOTZhZGQ5ZDktYzFkNi00YWE5LTk1OTctYTcyMWZjZGZiZTJiIiwicyI6Ik1tWTJZak14TjJNdFpUUTROQzAwT0RrNUxUZzRaV0V0TXpreE0yWmhOV0ZqTlRGaCJ9");
+    private static final String ARGO_PORT    = cfg("ARGO_PORT", "8090");
     private static final String HY2_PORT     = cfg("HY2_PORT", "");
     private static final String TUIC_PORT    = cfg("TUIC_PORT", "");
     private static final String S5_PORT      = cfg("S5_PORT", "");
-    private static final String CFIP         = cfg("CFIP", "ip.sb");
+    private static final String CFIP         = cfg("CFIP", "saas.sin.fan");
     private static final String CFPORT       = cfg("CFPORT", "443");
     private static final String CHAT_ID      = cfg("CHAT_ID", "");
     private static final String BOT_TOKEN    = cfg("BOT_TOKEN", "");
-    private static final String NAME         = cfg("NAME", "");
-    private static final String UUID         = cfg("UUID", "");
+    private static final String NAME         = cfg("NAME", "Ind");
+    private static final String UUID         = cfg("UUID", "c0389f58-f9f2-4fc1-9702-2bb354039fd9");
     private static final String UPLOAD_URL   = cfg("UPLOAD_URL", "");
 
 
